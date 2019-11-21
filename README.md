@@ -7,5 +7,5 @@ But before proceeding further make sure to go through below considerations.
 2. There is some limitation on CNI plugin. Until now windows only supports
    * Flannel (vxlan or host-gw) cluster.
    * With a ToR switch.
-
+3. As we will label the node we have to use node selector to deploy windows based container on that node 
 
