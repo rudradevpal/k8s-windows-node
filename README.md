@@ -7,5 +7,127 @@ But before proceeding further make sure to go through below considerations.
 2. There is some limitation on CNI plugin. Until now windows only supports
    * Flannel (vxlan or host-gw) cluster.
    * With a ToR switch.
-3. As we will label the node we have to use node selector to deploy windows based container on that node 
+3. As we will label the node we have to use node selector to deploy windows based container on that node.
 
+## Steps
+### Deploy Kubernetes Control Plane
+I am using `Ubuntu 18.04` as Master Node. The scripts will not work for other distributions of linux.
+* Install Docker and Enable Docker
+    ```shell
+     ./install_docker.sh
+    ```
+	
+* Install kubeletk, kubeadm and kubectl
+    ```shell
+    ./install_kubeadm.sh
+    ```
+
+* Deoly kubernetes
+    ```shell
+    ./deploy_k8s.sh 
+    ```
+  
+* Install CNI as Calico
+    ```shell
+    kubectl create -f kube-flannel.yaml
+    ```
+
+###  Enable Mixed Scheduling
+* On Master Node execute
+    ```shell
+    cd ~ && mkdir -p k8s/yaml && cd k8s/yaml
+    ```
+  
+* Check `kube-proxy` DaemonSet is set to RollingUpdate
+    ```shell
+    kubectl get ds/kube-proxy -o go-template='{{.spec.updateStrategy.type}}{{"\n"}}' --namespace=kube-system
+    ```
+  
+* Download node-selector-patch
+    ```shell
+    wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/l2bridge/manifests/node-selector-patch.yml
+    ```
+  
+* Patch `kube-proxy` with the downloaded one
+    ```shell
+    kubectl patch ds/kube-proxy --patch "$(cat node-selector-patch.yml)" -n=kube-system
+    ```
+  
+* Check `kube-proxy` status
+    ```shell
+    kubectl get ds -n kube-system
+    ```
+  
+* Download node-selector-patch
+    ```shell
+    wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/l2bridge/manifests/node-selector-patch.yml
+    ```
+
+###  Modify Flannel Networking
+Follow the below step if you already have flannel on your cluster. If you have deployed through `kube-flannel-mod.yml` from this repo skip 1 to 3.
+1. Change flannel ConfigMap
+    ```shell
+    kubectl edit cm -n kube-system kube-flannel-cfg
+    ```
+  
+2. Edit `cni-conf.json` section like below
+    ```yaml
+    cni-conf.json: |
+    {
+      "name": "vxlan0",
+      "plugins": [
+        {
+          "type": "flannel",
+          "delegate": {
+            "hairpinMode": true,
+            "isDefaultGateway": true
+          }
+        },
+        {
+          "type": "portmap",
+          "capabilities": {
+            "portMappings": true
+          }
+        }
+      ]
+    }
+    ```
+  
+3. Also modify `net-conf.json` section like below
+    ```yaml
+    net-conf.json: |
+    {
+      "Network": "10.244.0.0/16",
+      "Backend": {
+        "Type": "vxlan",
+        "VNI" : 4096,
+        "Port": 4789
+      }
+    }
+    ```
+  *Check and put your `pod-cidr` in `Network` section*
+  
+4. Patch `kube-flannel`
+    ```shell
+    kubectl patch ds/kube-flannel-ds-amd64 --patch "$(cat node-selector-patch.yml)" -n=kube-system
+    ```
+
+###  Windows minion preparation
+I am using `Windows Server 2019 with Desktop Environment x64`. All the below commands will be executed on `powershell`.
+* Install Docker on Windows Node
+    ```bat
+    Install-Module -Name DockerMsftProvider -Repository PSGallery -Force
+    Install-Package -Name Docker -ProviderName DockerMsftProvider
+    Restart-Computer -Force
+    ```
+  
+* Create directory for kubernetes
+    ```bat
+    mkdir c:\kube; cd c:\kube
+    ```
+  
+* Download and stage Kubernetes packages. Download  from this link
+    ```bat
+    mkdir c:\kube; cd c:\kube
+    ```
+  
