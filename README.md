@@ -27,7 +27,7 @@ I am using `Ubuntu 18.04` as Master Node. The scripts will not work for other di
     ./deploy_k8s.sh 
     ```
   
-* Install CNI as Calico
+* Install CNI as Flannel
     ```shell
     kubectl create -f kube-flannel.yaml
     ```
@@ -120,14 +120,55 @@ I am using `Windows Server 2019 with Desktop Environment x64`. All the below com
     Install-Package -Name Docker -ProviderName DockerMsftProvider
     Restart-Computer -Force
     ```
-  
+
+* Start Docker
+    ```bat
+    Start-Service docker
+    ```
+
 * Create directory for kubernetes
     ```bat
-    mkdir c:\kube; cd c:\kube
+    mkdir C:\kube; cd C:\kube
     ```
   
-* Download and stage Kubernetes packages. Download  from this link
+* Download and stage Kubernetes packages. Download [kubernetes-node-windows-amd64](https://dl.k8s.io/v1.15.6/kubernetes-node-windows-amd64.tar.gz). Extract and Find `kubeadm`, `kubectl`, `kubelet`, and `kube-proxy` put all the files in `C:\kube`.
+
+* Copy Kubernetes certificate file from master node(From `~/.kube/config`) to `C:\kube` directory.
+
+* Add paths to environment variables
     ```bat
-    mkdir c:\kube; cd c:\kube
+    $env:Path += ";C:\kube"; $env:KUBECONFIG="C:\kube\config"; [Environment]::SetEnvironmentVariable("Path", $env:Path + ";C:\kube", [EnvironmentVariableTarget]::Machine); [Environment]::SetEnvironmentVariable("KUBECONFIG", "C:\kube\config", [EnvironmentVariableTarget]::User)
     ```
-  
+
+###  Joining Windows Minion to Master
+I am using `Windows Server 2019 with Desktop Environment x64`. All the below commands will be executed on `powershell`.
+* Download Script
+    ```bat
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/start.ps1 -o c:\k\start.ps1
+    ```
+
+* Go to `C:\kube`
+    ```bat
+    cd C:\kube
+    ```
+
+* Join Flannel Cluster. Replace `IP_OF_WINDOWS_NODE` with node IP.
+    ```bat
+    .\start.ps1 -ManagementIP <IP_OF_WINDOWS_NODE> -NetworkMode overlay -InterfaceName Ethernet -Verbose
+
+###  Test Windows Node
+* Get YAML
+    ```shell
+    wget https://raw.githubusercontent.com/Microsoft/SDN/master/Kubernetes/flannel/l2bridge/manifests/simpleweb.yml -O win-webserver.yaml
+    ```
+
+* Deploy on K8s
+    ```shell
+    kubectl apply -f .\win-webserver.yaml
+    ```
+
+* Check Status
+    ```shell
+    kubectl get pods -o wide -w
+    ```
