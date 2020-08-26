@@ -17,7 +17,7 @@ I am using `Ubuntu 18.04` as Master Node. The scripts will not work for other di
      ./install_docker.sh
     ```
 	
-* Install kubelet, kubeadm and kubectl
+* Install kubeletk, kubeadm and kubectl
     ```shell
     ./install_kubeadm.sh
     ```
