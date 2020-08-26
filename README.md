@@ -10,19 +10,19 @@ But before proceeding further make sure to go through below considerations.
 3. As we will label the node we have to use node selector to deploy windows based container on that node.
 
 ## Steps
-### Deploy Kubernetes Control Plane
+### Deploy Kubernetes Control Panel
 I am using `Ubuntu 18.04` as Master Node. The scripts will not work for other distributions of linux.
 * Install Docker and Enable Docker
     ```shell
      ./install_docker.sh
     ```
 	
-* Install kubeletk, kubeadm and kubectl
+* Install kubelet, kubeadm and kubectl
     ```shell
     ./install_kubeadm.sh
     ```
 
-* Deoly kubernetes
+* Deploy kubernetes
     ```shell
     ./deploy_k8s.sh 
     ```
@@ -133,7 +133,7 @@ I am using `Windows Server 2019 with Desktop Environment x64`. All the below com
   
 * Download and stage Kubernetes packages. Download [kubernetes-node-windows-amd64](https://dl.k8s.io/v1.15.6/kubernetes-node-windows-amd64.tar.gz). Extract and Find `kubeadm`, `kubectl`, `kubelet`, and `kube-proxy` put all the files in `C:\kube`.
 
-* Copy Kubernetes certificate file from master node(From `~/.kube/config`) to `C:\kube` directory.
+* Copy Kubernetes certificate file from master node (From `~/.kube/config`) to `C:\kube` directory.
 
 * Add paths to environment variables
     ```bat
