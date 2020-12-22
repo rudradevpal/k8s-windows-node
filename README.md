@@ -133,7 +133,7 @@ I am using `Windows Server 2019 with Desktop Environment x64`. All the below com
   
 * Download and stage Kubernetes packages. Download [kubernetes-node-windows-amd64](https://dl.k8s.io/v1.15.6/kubernetes-node-windows-amd64.tar.gz). Extract and Find `kubeadm`, `kubectl`, `kubelet`, and `kube-proxy` put all the files in `C:\kube`.
 
-* Copy Kubernetes certificate file from master node(From `~/.kube/config`) to `C:\kube` directory.
+* Copy Kubernetes certificate file from master node (From `~/.kube/config`) to `C:\kube` directory.
 
 * Add paths to environment variables
     ```bat
