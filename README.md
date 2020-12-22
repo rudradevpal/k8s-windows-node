@@ -10,7 +10,7 @@ But before proceeding further make sure to go through below considerations.
 3. As we will label the node we have to use node selector to deploy windows based container on that node.
 
 ## Steps
-### Deploy Kubernetes Control Panel
+### Deploy Kubernetes Control Plane
 I am using `Ubuntu 18.04` as Master Node. The scripts will not work for other distributions of linux.
 * Install Docker and Enable Docker
     ```shell
